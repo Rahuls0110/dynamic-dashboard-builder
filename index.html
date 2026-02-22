@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic Dashboard Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- SheetJS for Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- jsPDF for PDF download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- html2canvas for capturing card/KPI as image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <h1>📊 Dynamic Dashboard Builder</h1>
+
+  <div class="controls">
+    <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" />
+
+    <select id="chartType">
+      <option value="bar">Bar</option>
+      <option value="line">Line</option>
+      <option value="pie">Pie</option>
+      <option value="card">Card</option>
+      <option value="kpi">KPI</option>
+    </select>
+
+    <input id="titleInput" placeholder="Title (optional)" />
+
+    <!-- Three-axis structure -->
+    <select id="xAxis"></select>
+    <select id="yAxis"></select>
+    <select id="dateAxis"></select>
+
+    <select id="aggregation">
+      <option value="sum">Sum</option>
+      <option value="avg">Average</option>
+      <option value="count">Count</option>
+    </select>
+
+    <button id="addChart">➕ Add Chart</button>
+    <button id="downloadAllPDF" disabled>📥 Download All Charts PDF</button>
+  </div>
+
+  <div id="dashboard" class="dashboard"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

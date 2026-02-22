@@ -1,0 +1,158 @@
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background: #f5f7fb;
+  margin: 20px;
+}
+
+h1 {
+  margin-bottom: 14px;
+  color: #1e293b;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+  input, select, button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+  }
+
+  button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #1d4ed8;
+    }
+
+    &:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  }
+
+  &.chart {
+    flex: 2 1 400px;
+    min-width: 350px;
+  }
+
+  &.card,
+  &.kpi {
+    flex: 1 1 220px;
+    min-width: 180px;
+  }
+
+  .chart-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    color: #0f172a;
+    padding-right: 50px; // space for buttons
+  }
+
+  .card-buttons {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .remove-btn,
+  .download-btn {
+    cursor: pointer;
+    font-weight: bold;
+    color: #64748b;
+    background: rgba(255,255,255,0.9);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+    line-height: 1;
+
+    &:hover {
+      background: #fff;
+    }
+  }
+
+  .remove-btn:hover {
+    color: #e11d48;
+    border-color: #e11d48;
+  }
+
+  .download-btn:hover {
+    color: #2563eb;
+    border-color: #2563eb;
+  }
+
+  .card-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 10px 0;
+  }
+
+  .kpi-delta {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &.chart canvas {
+    max-height: 280px;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .data-warning {
+    color: #d97706;
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .chart-card.chart {
+    flex: 1 1 100%;
+  }
+  .chart-card.card,
+  .chart-card.kpi {
+    flex: 1 1 100%;
+  }
+}
