@@ -1325,15 +1325,15 @@ async function exportExecutivePDF() {
       pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
 
       // Top Executive Header Banner
-      pdf.setFontSize(16);
+      pdf.setFontSize(15);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(textHex);
-      pdf.text(activeStudioTitle.textContent || 'Executive BI Analytics Report', margin, 12);
+      pdf.text(activeStudioTitle.textContent || 'Operations & Analytics Report', margin, 12);
 
-      pdf.setFontSize(9);
+      pdf.setFontSize(8.5);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(subHex);
-      pdf.text(`Generated: ${new Date().toLocaleString()} | Theme: ${activePalette.name} (${isDarkMode ? 'Dark' : 'Light'})`, margin, 17);
+      pdf.text(`${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} | Interactive Dashboard Export`, margin, 17);
 
       // Add single or multi-page content cleanly without trailing empty space
       const availablePageContentHeight = contentHeight - 12; // accommodate top banner on page 1
@@ -1355,9 +1355,9 @@ async function exportExecutivePDF() {
             pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
 
             // Running Header
-            pdf.setFontSize(9);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(accentHex);
+            pdf.setFontSize(8.5);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(subHex);
             pdf.text(`${activeStudioTitle.textContent} — Page ${p + 1} of ${totalPages}`, margin, 10);
           }
 
@@ -1381,7 +1381,8 @@ async function exportExecutivePDF() {
         }
       }
 
-      pdf.save(`Executive_BI_Report_${Date.now()}.pdf`);
+      const fileName = (activeStudioTitle.textContent || 'Dashboard_Report').replace(/[^a-zA-Z0-9]/g, '_');
+      pdf.save(`${fileName}.pdf`);
     } catch (err) {
       alert('Failed to generate PDF: ' + err.message);
     } finally {
