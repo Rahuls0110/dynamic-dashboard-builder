@@ -3,49 +3,258 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamic Dashboard Builder</title>
+  <title>Dynamic BI & Analytics Studio | Interactive Dashboard Builder</title>
+  
+  <!-- Modern Typography (Inter Font) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Libraries: Local bundled with CDN Fallback -->
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- SheetJS for Excel -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-  <!-- jsPDF for PDF download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- html2canvas for capturing card/KPI as image -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="lib/chart.umd.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'"></script>
+  <!-- SheetJS (XLSX) -->
+  <script src="lib/xlsx.full.min.js" onerror="this.onerror=null;this.src='https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js'"></script>
+  <!-- jsPDF -->
+  <script src="lib/jspdf.umd.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'"></script>
+  <!-- html2canvas -->
+  <script src="lib/html2canvas.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'"></script>
 </head>
-<body>
-  <h1>📊 Dynamic Dashboard Builder</h1>
+<body class="dark-theme">
 
-  <div class="controls">
-    <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" />
-
-    <select id="chartType">
-      <option value="bar">Bar</option>
-      <option value="line">Line</option>
-      <option value="pie">Pie</option>
-      <option value="card">Card</option>
-      <option value="kpi">KPI</option>
-    </select>
-
-    <input id="titleInput" placeholder="Title (optional)" />
-
-    <!-- Three-axis structure -->
-    <select id="xAxis"></select>
-    <select id="yAxis"></select>
-    <select id="dateAxis"></select>
-
-    <select id="aggregation">
-      <option value="sum">Sum</option>
-      <option value="avg">Average</option>
-      <option value="count">Count</option>
-    </select>
-
-    <button id="addChart">➕ Add Chart</button>
-    <button id="downloadAllPDF" disabled>📥 Download All Charts PDF</button>
+  <!-- PDF Generation Loading Overlay -->
+  <div id="pdfLoadingOverlay" class="pdf-loading-overlay" style="display: none;">
+    <div class="pdf-loading-card glass-panel">
+      <div class="spinner"></div>
+      <h3>Generating Executive BI Report</h3>
+      <p>Rendering high-resolution multi-widget dashboard canvas...</p>
+      <span id="pdfTimestampBadge" class="timestamp-badge"></span>
+    </div>
   </div>
 
-  <div id="dashboard" class="dashboard"></div>
+  <div class="studio-container">
+    <!-- Studio Top Navigation Header -->
+    <header class="studio-header glass-panel">
+      <div class="header-left">
+        <div class="brand-row">
+          <div class="studio-badge">
+            <span class="pulse-dot"></span>
+            BI & ANALYTICS STUDIO
+          </div>
+          <h1 id="activeStudioTitle">Dynamic Dashboard Builder</h1>
+        </div>
+        <p id="activeStudioSubtitle" class="studio-subtitle">
+          Real-time multi-dimensional data visualization, interactive slicers, and executive reporting.
+        </p>
+      </div>
+
+      <!-- Header Actions (Themes, Palettes, Templates, Exports) -->
+      <div class="header-right">
+        <!-- Curated Color Palettes -->
+        <div class="palette-picker-group">
+          <label>Palette:</label>
+          <div id="paletteOptions" class="palette-options">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- Dark / Light Theme Toggle -->
+        <button id="themeToggleBtn" class="icon-btn" title="Toggle Dark / Light Theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <!-- Template Export / Import -->
+        <button id="exportTemplateBtn" class="icon-btn" title="Export Dashboard Layout (.json)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+        <button id="importTemplateBtn" class="icon-btn" title="Import Dashboard Template (.json)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        </button>
+        <input type="file" id="templateFileInput" accept=".json" style="display: none;" />
+
+        <!-- Executive PDF Report Button -->
+        <button id="downloadAllPDF" class="btn btn-primary btn-pdf" title="Generate Executive Multi-Widget PDF Report">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Executive PDF Report
+        </button>
+      </div>
+    </header>
+
+    <!-- Dataset & Dropzone Control Strip -->
+    <section id="dropZoneStrip" class="dataset-control-strip glass-panel">
+      <div class="dataset-pills">
+        <span class="label">Data Source:</span>
+        
+        <!-- 1 Comprehensive Master Showcase Dataset -->
+        <button id="btnShowcaseDataset" class="pill-btn active" title="Load comprehensive showcase dashboard with all 10+ chart types">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          Master Showcase Dataset (All 10+ Visualizations)
+        </button>
+
+        <!-- Upload / Drop custom CSV or Excel -->
+        <button id="btnCustomUpload" class="pill-btn custom-drop" title="Upload or drop any CSV or Excel file">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Upload / Drop CSV or Excel
+        </button>
+        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display: none;" />
+      </div>
+
+      <!-- Global Cross-Filter Slicers -->
+      <div id="slicerControls" class="slicer-controls">
+        <div class="slicer-group">
+          <label for="categorySlicer">Dimension Slicer:</label>
+          <select id="categorySlicer">
+            <option value="All">All Regions / Depts</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <label for="timeRangeSlicer">Time Window:</label>
+          <select id="timeRangeSlicer">
+            <option value="All Time">All Time</option>
+            <option value="Year to Date">Year to Date (YTD)</option>
+            <option value="Last 90 Days">Last 90 Days</option>
+            <option value="Last 30 Days">Last 30 Days</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Widget Studio Builder Section -->
+    <section class="studio-builder-card glass-panel">
+      <div class="builder-card-header">
+        <div class="builder-title-group">
+          <div class="builder-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          </div>
+          <div>
+            <h3>Custom Widget Builder</h3>
+            <p class="builder-sub">Configure chart types, map category/metric dimensions, and build customized widgets on your canvas.</p>
+          </div>
+        </div>
+        <div class="builder-actions">
+          <button id="addChart" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + Add Widget to Canvas
+          </button>
+          <button id="clearCanvasBtn" class="btn btn-outline" title="Clear all canvas widgets">Clear All</button>
+        </div>
+      </div>
+
+      <div class="builder-form-grid">
+        <!-- 1. Visualization Type -->
+        <div class="form-field">
+          <label for="chartType">Visualization Type</label>
+          <select id="chartType" class="builder-select">
+            <optgroup label="10+ Visualization Suite">
+              <option value="bar">Vertical Bar Chart</option>
+              <option value="horizontalBar">Horizontal Bar Chart</option>
+              <option value="stackedBar">Stacked Bar Chart</option>
+              <option value="line">Line Trend Chart</option>
+              <option value="area">Gradient Area Chart</option>
+              <option value="doughnut">Doughnut Chart</option>
+              <option value="pie">Pie Chart</option>
+              <option value="radar">Radar Chart</option>
+              <option value="polarArea">Polar Area Chart</option>
+            </optgroup>
+            <optgroup label="Summary & KPI Metrics">
+              <option value="card">Summary Metric Card</option>
+              <option value="kpi">Executive KPI Tile (Trend %)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- 2. Widget Title -->
+        <div class="form-field">
+          <label for="titleInput">Custom Title (Optional)</label>
+          <input id="titleInput" class="builder-input" placeholder="e.g., Department Revenue" />
+        </div>
+
+        <!-- 3. X Axis / Category -->
+        <div class="form-field" id="xAxisField">
+          <label for="xAxis">Category Dimension (X-Axis)</label>
+          <select id="xAxis" class="builder-select"></select>
+        </div>
+
+        <!-- 4. Y Axis / Metric -->
+        <div class="form-field">
+          <label for="yAxis">Metric Column (Y-Axis)</label>
+          <select id="yAxis" class="builder-select"></select>
+        </div>
+
+        <!-- 5. Aggregation -->
+        <div class="form-field">
+          <label for="aggregation">Aggregation Calculation</label>
+          <select id="aggregation" class="builder-select">
+            <option value="sum">Sum (Total)</option>
+            <option value="avg">Average (Mean)</option>
+            <option value="count">Count (Rows)</option>
+          </select>
+        </div>
+
+        <!-- 6. Date Axis (for KPI) -->
+        <div class="form-field" id="dateAxisGroup" style="display: none;">
+          <label for="dateAxis">Date Column (Comparison)</label>
+          <select id="dateAxis" class="builder-select"></select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Canvas Container (Captured during PDF export) -->
+    <main id="studioCanvasRoot" class="studio-canvas">
+      <!-- Executive Metric KPI Summary Row -->
+      <section id="kpiContainer" class="kpi-grid">
+        <!-- Dynamically generated KPI cards -->
+      </section>
+
+      <!-- Visualizations & Widgets Grid -->
+      <section id="dashboard" class="dashboard-grid">
+        <!-- Dynamically generated charts & cards -->
+      </section>
+    </main>
+  </div>
+
+  <!-- Interactive Data Slice Drill-Down Modal -->
+  <div id="drilldownModalBackdrop" class="drilldown-modal-backdrop" style="display: none;">
+    <div class="drilldown-modal glass-panel">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="modal-badge">DATA SLICE DRILL-DOWN</span>
+          <h3 id="drilldownTitle">Widget Deep Dive</h3>
+        </div>
+        <button id="closeDrilldownBtn" class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="drilldown-desc">
+          Interactive categorical inspection, calculated metrics, and proportional share across this dimension slice.
+        </p>
+
+        <div class="slices-table-wrapper">
+          <table class="slices-table">
+            <thead>
+              <tr>
+                <th>Category Dimension</th>
+                <th>Aggregated Value</th>
+                <th>Share of Total</th>
+                <th>Distribution Share</th>
+              </tr>
+            </thead>
+            <tbody id="drilldownTableBody">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="closeDrilldownFooterBtn" class="btn btn-outline">Close</button>
+        <button id="exportDrilldownCsvBtn" class="btn btn-outline">Export Table CSV</button>
+        <button id="exportDrilldownPngBtn" class="btn btn-primary">Export Chart PNG</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
